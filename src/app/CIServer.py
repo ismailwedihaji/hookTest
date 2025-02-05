@@ -18,7 +18,6 @@ class SimpleHandler(BaseHTTPRequestHandler):
         self.wfile.write(message.encode())
 
     def do_POST(self):
-        # Read the incoming post data (payload from GitHub webhook)
         content_length = int(self.headers['Content-Length'])
         post_data = self.rfile.read(content_length)
         
@@ -31,6 +30,9 @@ class SimpleHandler(BaseHTTPRequestHandler):
             # Call the clone_check function
             result = clone_check(repo_url, branch) 
         
+            # Print the result to the console
+            print("Result of syntax check:", result)
+            
             # Send response with the result of syntax check
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
@@ -47,15 +49,12 @@ class SimpleHandler(BaseHTTPRequestHandler):
             error_response = {'status': 'error', 'message': str(e)}
             self.wfile.write(json.dumps(error_response).encode())
 
-# Function that clones the repo and checks syntax
 def clone_check(repo_url, branch):
-    temp_dir = tempfile.mkdtemp()  # Create temporary directory for cloning
+    temp_dir = tempfile.mkdtemp()
     try:
-        # Clone the specified branch of the repo to the temporary directory
         print(f"Cloning {repo_url} branch {branch} to {temp_dir}")
         repo = Repo.clone_from(repo_url, temp_dir, branch=branch)
         
-        # Perform syntax check
         result = syntax_check(temp_dir)
         result["repository"] = {
             "url": repo_url,
@@ -64,7 +63,6 @@ def clone_check(repo_url, branch):
         return result
         
     except Exception as e:
-        # Return error details if cloning or checking fails
         return {
             "status": "error",
             "message": f"Error during cloning: {str(e)}",
@@ -76,17 +74,16 @@ def clone_check(repo_url, branch):
             "details": {"error": str(e)}
         }
     finally:
-        shutil.rmtree(temp_dir)  # Clean up the temporary directory after process
+        shutil.rmtree(temp_dir)
 
-# Function that performs syntax check on Python files
 def syntax_check(directory):
-    python_files = []  # List to store Python file paths
-    for root, _, files in os.walk(directory):  # Walk through the cloned repo
+    python_files = []
+    for root, _, files in os.walk(directory):
         for file in files:
-            if file.endswith('.py'):  # Check for Python files
+            if file.endswith('.py'):
                 python_files.append(os.path.join(root, file))
     
-    if not python_files:  # No Python files found in the repo
+    if not python_files:
         return {
             "status": "warning",
             "message": "No Python files found to check",
@@ -99,10 +96,9 @@ def syntax_check(directory):
             "details": {}
         }
     
-    output = StringIO()  # To capture pylint output
+    output = StringIO()
     reporter = JSONReporter(output)
     
-    # Pylint options to only check for syntax errors and undefined variables
     pylint_opts = [
         '--disable=all', 
         '--enable=syntax-error,undefined-variable', 
@@ -110,7 +106,7 @@ def syntax_check(directory):
     ]
     
     try:
-        pylint.lint.Run(pylint_opts, reporter=reporter, exit=False)  # Run pylint check
+        pylint.lint.Run(pylint_opts, reporter=reporter, exit=False)
         result = output.getvalue()
         return {
             "status": "success",
@@ -155,7 +151,7 @@ def syntax_check(directory):
             }
         }
 
-# Function to run the server
+
 def run_server(port):
     server = HTTPServer(('', port), SimpleHandler)
     print(f'Server running on port {port}...')
