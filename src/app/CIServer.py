@@ -18,21 +18,22 @@ class SimpleHandler(BaseHTTPRequestHandler):
         self.wfile.write(message.encode())
 
     def do_POST(self):
+        # Print message to indicate POST request received
+        print("POST request received.")
+        
         content_length = int(self.headers['Content-Length'])
         post_data = self.rfile.read(content_length)
         
         try:
             payload = json.loads(post_data.decode('utf-8'))
-            
             repo_url = payload['repository']['clone_url']
             branch = payload['ref'].split('/')[-1]  # refs/heads/branch-name -> branch-name
-            print(f"Received webhook: {repo_url} for branch {branch}")
-
+            
+            print(f"Received webhook: Repository URL: {repo_url}, Branch: {branch}")
+            
             # Call the function to clone the repo and check for syntax errors
             result = clone_check(repo_url, branch)
-            
-            # Print the result
-            print(f"Result of syntax check: {json.dumps(result, indent=2)}")
+            print(f"Result: {json.dumps(result, indent=2)}")
         
             # Respond with the result
             self.send_response(200)
