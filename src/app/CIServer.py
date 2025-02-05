@@ -22,27 +22,27 @@ class SimpleHandler(BaseHTTPRequestHandler):
         post_data = self.rfile.read(content_length)
         
         try:
-            # Parse the payload data to extract repo info
             payload = json.loads(post_data.decode('utf-8'))
+            
             repo_url = payload['repository']['clone_url']
             branch = payload['ref'].split('/')[-1]  # refs/heads/branch-name -> branch-name
-        
-            # Call the clone_check function
-            result = clone_check(repo_url, branch) 
-        
-            # Print the result to the console
-            print("Result of syntax check:", result)
+            print(f"Received webhook: {repo_url} for branch {branch}")
+
+            # Call the function to clone the repo and check for syntax errors
+            result = clone_check(repo_url, branch)
             
-            # Send response with the result of syntax check
+            # Print the result
+            print(f"Result of syntax check: {json.dumps(result, indent=2)}")
+        
+            # Respond with the result
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
             self.end_headers()
-            
             response = {'status': 'success', 'message': result}
             self.wfile.write(json.dumps(response).encode())
             
         except Exception as e:
-            # Send error response if something goes wrong
+            print(f"Error during POST: {str(e)}")
             self.send_response(500)
             self.send_header('Content-type', 'application/json')
             self.end_headers()
@@ -53,8 +53,10 @@ def clone_check(repo_url, branch):
     temp_dir = tempfile.mkdtemp()
     try:
         print(f"Cloning {repo_url} branch {branch} to {temp_dir}")
+        # Clone the repo from the provided URL and branch
         repo = Repo.clone_from(repo_url, temp_dir, branch=branch)
         
+        # Check the syntax of the cloned repository
         result = syntax_check(temp_dir)
         result["repository"] = {
             "url": repo_url,
@@ -63,6 +65,7 @@ def clone_check(repo_url, branch):
         return result
         
     except Exception as e:
+        print(f"Error during cloning: {str(e)}")
         return {
             "status": "error",
             "message": f"Error during cloning: {str(e)}",
@@ -74,9 +77,11 @@ def clone_check(repo_url, branch):
             "details": {"error": str(e)}
         }
     finally:
+        # Clean up by removing the temporary directory
         shutil.rmtree(temp_dir)
 
 def syntax_check(directory):
+    # Get all Python files in the directory to check for syntax errors
     python_files = []
     for root, _, files in os.walk(directory):
         for file in files:
@@ -84,6 +89,7 @@ def syntax_check(directory):
                 python_files.append(os.path.join(root, file))
     
     if not python_files:
+        print("No Python files found to check.")
         return {
             "status": "warning",
             "message": "No Python files found to check",
@@ -96,6 +102,7 @@ def syntax_check(directory):
             "details": {}
         }
     
+    # Initialize pylint to run a static code analysis
     output = StringIO()
     reporter = JSONReporter(output)
     
@@ -106,8 +113,13 @@ def syntax_check(directory):
     ]
     
     try:
+        # Run pylint to check for syntax errors
+        print("Running syntax check with pylint...")
         pylint.lint.Run(pylint_opts, reporter=reporter, exit=False)
         result = output.getvalue()
+        
+        # Return result with no errors
+        print(f"Syntax check passed: {result}")
         return {
             "status": "success",
             "message": "Syntax check passed",
@@ -120,6 +132,8 @@ def syntax_check(directory):
             "details": {}
         }
     except Exception as e:
+        # If errors are found, return them in the response
+        print(f"Syntax errors found: {str(e)}")
         return {
             "status": "error",
             "message": "Syntax errors found",
@@ -150,7 +164,6 @@ def syntax_check(directory):
                 ]
             }
         }
-
 
 def run_server(port):
     server = HTTPServer(('', port), SimpleHandler)
