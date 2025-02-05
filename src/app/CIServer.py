@@ -18,24 +18,17 @@ class SimpleHandler(BaseHTTPRequestHandler):
         self.wfile.write(message.encode())
 
     def do_POST(self):
-        # Print message to indicate POST request received
-        print("POST request received.")
-        
         content_length = int(self.headers['Content-Length'])
         post_data = self.rfile.read(content_length)
         
         try:
             payload = json.loads(post_data.decode('utf-8'))
+            
             repo_url = payload['repository']['clone_url']
             branch = payload['ref'].split('/')[-1]  # refs/heads/branch-name -> branch-name
-            
-            print(f"Received webhook: Repository URL: {repo_url}, Branch: {branch}")
-            
-            # Call the function to clone the repo and check for syntax errors
-            result = clone_check(repo_url, branch)
-            print(f"Result: {json.dumps(result, indent=2)}")
         
-            # Respond with the result
+            result = clone_check(repo_url, branch) 
+        
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
             self.end_headers()
@@ -43,7 +36,6 @@ class SimpleHandler(BaseHTTPRequestHandler):
             self.wfile.write(json.dumps(response).encode())
             
         except Exception as e:
-            print(f"Error during POST: {str(e)}")
             self.send_response(500)
             self.send_header('Content-type', 'application/json')
             self.end_headers()
@@ -54,10 +46,8 @@ def clone_check(repo_url, branch):
     temp_dir = tempfile.mkdtemp()
     try:
         print(f"Cloning {repo_url} branch {branch} to {temp_dir}")
-        # Clone the repo from the provided URL and branch
         repo = Repo.clone_from(repo_url, temp_dir, branch=branch)
         
-        # Check the syntax of the cloned repository
         result = syntax_check(temp_dir)
         result["repository"] = {
             "url": repo_url,
@@ -66,7 +56,6 @@ def clone_check(repo_url, branch):
         return result
         
     except Exception as e:
-        print(f"Error during cloning: {str(e)}")
         return {
             "status": "error",
             "message": f"Error during cloning: {str(e)}",
@@ -78,11 +67,9 @@ def clone_check(repo_url, branch):
             "details": {"error": str(e)}
         }
     finally:
-        # Clean up by removing the temporary directory
         shutil.rmtree(temp_dir)
 
 def syntax_check(directory):
-    # Get all Python files in the directory to check for syntax errors
     python_files = []
     for root, _, files in os.walk(directory):
         for file in files:
@@ -90,7 +77,6 @@ def syntax_check(directory):
                 python_files.append(os.path.join(root, file))
     
     if not python_files:
-        print("No Python files found to check.")
         return {
             "status": "warning",
             "message": "No Python files found to check",
@@ -103,7 +89,6 @@ def syntax_check(directory):
             "details": {}
         }
     
-    # Initialize pylint to run a static code analysis
     output = StringIO()
     reporter = JSONReporter(output)
     
@@ -114,13 +99,8 @@ def syntax_check(directory):
     ]
     
     try:
-        # Run pylint to check for syntax errors
-        print("Running syntax check with pylint...")
         pylint.lint.Run(pylint_opts, reporter=reporter, exit=False)
         result = output.getvalue()
-        
-        # Return result with no errors
-        print(f"Syntax check passed: {result}")
         return {
             "status": "success",
             "message": "Syntax check passed",
@@ -133,8 +113,6 @@ def syntax_check(directory):
             "details": {}
         }
     except Exception as e:
-        # If errors are found, return them in the response
-        print(f"Syntax errors found: {str(e)}")
         return {
             "status": "error",
             "message": "Syntax errors found",
@@ -166,7 +144,9 @@ def syntax_check(directory):
             }
         }
 
+
 def run_server(port):
     server = HTTPServer(('', port), SimpleHandler)
     print(f'Server running on port {port}...')
     return server
+
