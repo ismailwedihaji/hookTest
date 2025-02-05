@@ -18,7 +18,7 @@ class SimpleHandler(BaseHTTPRequestHandler):
         self.wfile.write(message.encode())
 
     def do_POST(self):
-        content_length = int(self.headers['Content-Length'])
+        content_length = int(self.headers['Content-Length']
         post_data = self.rfile.read(content_length)
         
         try:
