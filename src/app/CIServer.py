@@ -101,6 +101,7 @@ def syntax_check(directory):
     try:
         pylint.lint.Run(pylint_opts, reporter=reporter, exit=False)
         result = output.getvalue()
+        print("hello, world!")
         return {
             "status": "success",
             "message": "Syntax check passed",
