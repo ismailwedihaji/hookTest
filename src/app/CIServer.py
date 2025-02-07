@@ -102,16 +102,17 @@ class SimpleHandler(BaseHTTPRequestHandler):
 
         try:
             payload = json.loads(post_data.decode('utf-8'))
+            print(f"Payload received: {payload}")  # Debugging
             
             # Extracting repository URL and branch name from the payload
             repo_url = payload['repository']['clone_url']
             branch = payload['ref'].split('/')[-1]  # Get the branch name
-            
             print(f"Received push event for branch: {branch} from repo: {repo_url}")
 
             # Step 2: Clone the repository and get commit ID
             # Update: Used the clone_check function to clone the repo and get the commit ID
-            result = clone_check(repo_url, branch)  
+            result = clone_check(repo_url, branch)
+            print(f"Clone check result: {result}")  # Debugging
             
             # Check if the result from clone_check is an error
             if result['status'] == 'error':
@@ -134,11 +135,13 @@ class SimpleHandler(BaseHTTPRequestHandler):
         
         except Exception as e:
             # If an error occurs, send a 500 error response
+            print(f"Error occurred: {e}")  # Debugging
             self.send_response(500)
             self.send_header('Content-type', 'application/json')
             self.end_headers()
             error_response = {'status': 'error', 'message': str(e)}
             self.wfile.write(json.dumps(error_response).encode())
+
 
 def run_server(port):
     """Run the HTTP server"""
