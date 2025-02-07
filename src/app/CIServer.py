@@ -55,6 +55,8 @@
 #     print(f'Server running on port {port}...')
 #     return server
 
+
+
 from http.server import HTTPServer, BaseHTTPRequestHandler
 import json
 import sqlite3
@@ -97,15 +99,8 @@ class SimpleHandler(BaseHTTPRequestHandler):
             if not commit_id:
                 raise Exception("Error cloning repository.")
             
-            # Step 3: Run tests and log the build
-            test_results = run_tests()  # This runs the tests and fetches the results
-            print(f"Test results: {test_results}")  # Debugging the test results
-
-            # Ensure test results are not empty or invalid
-            if not test_results:
-                raise ValueError("No test results returned. Ensure your tests are running correctly.")
-
-            log_build(commit_id, test_results)  # Log the build details in the database
+            # Step 3: Log only commit_id and build_date
+            log_build(commit_id)  # Log the commit ID and build date
             
             # Step 4: Generate the build URL
             build_url = get_build_url(commit_id)
@@ -114,7 +109,7 @@ class SimpleHandler(BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
             self.end_headers()
-            response = {'status': 'success', 'build_url': build_url, 'test_results': test_results}
+            response = {'status': 'success', 'build_url': build_url}
             self.wfile.write(json.dumps(response).encode())
         
         except Exception as e:

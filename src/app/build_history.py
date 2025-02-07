@@ -12,8 +12,7 @@ def create_database():
             CREATE TABLE IF NOT EXISTS builds (
                 id INTEGER PRIMARY KEY,
                 commit_id TEXT,
-                build_date TEXT,
-                build_logs TEXT
+                build_date TEXT
             )
         ''')
         conn.commit()
@@ -22,8 +21,8 @@ def create_database():
     except Exception as e:
         print(f"Error during database creation: {e}")
 
-# Step 2: Log the build information
-def log_build(commit_id, build_logs):
+# Step 2: Log the build information (commit_id, build_date)
+def log_build(commit_id):
     """Log the build details to the database."""
     try:
         print(f"Logging build for commit: {commit_id}")  # Debugging output
@@ -31,9 +30,9 @@ def log_build(commit_id, build_logs):
         cursor = conn.cursor()
         build_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')  # Current timestamp
         cursor.execute('''
-            INSERT INTO builds (commit_id, build_date, build_logs)
-            VALUES (?, ?, ?)
-        ''', (commit_id, build_date, build_logs))
+            INSERT INTO builds (commit_id, build_date)
+            VALUES (?, ?)
+        ''', (commit_id, build_date))
         conn.commit()
         conn.close()
         print(f"Build logged: {commit_id} on {build_date}")
