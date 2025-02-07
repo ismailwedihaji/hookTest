@@ -1,11 +1,5 @@
 import sqlite3
 from datetime import datetime
-import json
-import tempfile
-import shutil
-from git import Repo
-from runTests import run_tests
-from syntax_check import syntax_check
 
 # Step 1: Set up SQLite database to store build history
 def create_database():
@@ -44,6 +38,9 @@ def get_build_url(commit_id):
 # Step 4: Clone the repository and check out the branch
 def clone_check(repo_url, branch):
     """Clone the repository and perform syntax checking."""
+    import tempfile
+    import shutil
+    from git import Repo
     temp_dir = tempfile.mkdtemp()
     try:
         repo = Repo.clone_from(repo_url, temp_dir, branch=branch)
@@ -53,10 +50,3 @@ def clone_check(repo_url, branch):
         return None, None
     finally:
         shutil.rmtree(temp_dir)
-
-# Step 5: Run tests using pytest
-def run_tests_and_log(commit_id):
-    """Run tests and log the build."""
-    test_results = run_tests()  # This runs the tests and fetches the results
-    log_build(commit_id, test_results)  # Log the build details
-    return test_results
