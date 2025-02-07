@@ -6,8 +6,16 @@ def create_database():
     """Create the database and the 'builds' table if it doesn't exist."""
     print("Creating database and table if not exists.")  # Debugging output
     try:
+        # Check if the database file exists and print the message
+        print("Connecting to the database...")
         conn = sqlite3.connect('build_history.db')  # Database file
         cursor = conn.cursor()
+        
+        # Check the list of existing tables before creating the new one
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+        tables = cursor.fetchall()
+        print(f"Existing tables in the database: {tables}")  # Print the existing tables
+        
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS builds (
                 id INTEGER PRIMARY KEY,
@@ -16,8 +24,14 @@ def create_database():
             )
         ''')
         conn.commit()
+        
+        # After committing, print the success message and check the tables again
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+        tables = cursor.fetchall()
+        print(f"Tables after creation: {tables}")  # Print the tables after creation
+        
         conn.close()
-        print("Database created and table initialized.")
+        print("Database created and table initialized successfully.")
     except Exception as e:
         print(f"Error during database creation: {e}")
 
