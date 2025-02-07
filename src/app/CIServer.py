@@ -6,7 +6,8 @@ import shutil
 from git import Repo
 from runTests import run_tests
 from datetime import datetime
-from build_history import log_build, get_build_url, create_database, clone_check
+from build_history import log_build, get_build_url, create_database
+from clone import clone_check
 
 # Step 1: Ensure the build history database exists
 create_database()
