@@ -55,7 +55,6 @@
 #     print(f'Server running on port {port}...')
 #     return server
 
-
 from http.server import HTTPServer, BaseHTTPRequestHandler
 import json
 import sqlite3
@@ -100,6 +99,12 @@ class SimpleHandler(BaseHTTPRequestHandler):
             
             # Step 3: Run tests and log the build
             test_results = run_tests()  # This runs the tests and fetches the results
+            print(f"Test results: {test_results}")  # Debugging the test results
+
+            # Ensure test results are not empty or invalid
+            if not test_results:
+                raise ValueError("No test results returned. Ensure your tests are running correctly.")
+
             log_build(commit_id, test_results)  # Log the build details in the database
             
             # Step 4: Generate the build URL
