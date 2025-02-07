@@ -132,7 +132,7 @@ def log_build(commit_id):
 # Step 3: Generate a unique URL for each build
 def get_build_url(commit_id):
     """Generate a unique URL for a specific build."""
-    return f"http://localhost:8008/build/{commit_id}"
+    return f"https://github.com/ismailwedihaji/hookTest/commit/{commit_id}"
 
 # Step 4: Clone the repository and check out the branch
 def clone_check(repo_url, branch):
