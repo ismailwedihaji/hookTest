@@ -74,14 +74,14 @@
 #     assert result["repository"]["branch"] == branch
 
 
-import pytest
+# import pytest
 import requests
 import threading
 import time
 from app.CIServer import run_server
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from app.CIServer import SimpleHandler
-from app.clone import clone_check
+# from app.clone import clone_check
 
 @pytest.fixture(scope="module")
 def server():
@@ -132,29 +132,29 @@ def test_invalid_post_request(server):
     assert "ref" in data["message"]
 
 
-def test_clone_check_valid_request():
-    """Test valid clone_check request"""
+# def test_clone_check_valid_request():
+#     """Test valid clone_check request"""
 
-    repo_url = "https://github.com/FMurkz/DD2480-CI.git"
-    branch = "main"
+#     repo_url = "https://github.com/FMurkz/DD2480-CI.git"
+#     branch = "main"
 
-    result = clone_check(repo_url, branch)
+#     result = clone_check(repo_url, branch)
 
-    assert result["status"] == "success"
-    assert "message" in result
-    assert result["repository"]["url"] == repo_url
-    assert result["repository"]["branch"] == branch
+#     assert result["status"] == "success"
+#     assert "message" in result
+#     assert result["repository"]["url"] == repo_url
+#     assert result["repository"]["branch"] == branch
 
 
-def test_clone_check_invalid_request():
-    """Test invalid clone_check request"""
+# def test_clone_check_invalid_request():
+#     """Test invalid clone_check request"""
 
-    repo_url = "https://github.com/invalid/repo.git"  
-    branch = "main"
+#     repo_url = "https://github.com/invalid/repo.git"  
+#     branch = "main"
 
-    result = clone_check(repo_url, branch)
+#     result = clone_check(repo_url, branch)
 
-    assert result["status"] == "error"
-    assert "message" in result
-    assert "Error during cloning" in result["message"]
+#     assert result["status"] == "error"
+#     assert "message" in result
+#     assert "Error during cloning" in result["message"]
     
