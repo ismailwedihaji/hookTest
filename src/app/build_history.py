@@ -57,19 +57,19 @@ def get_build_url(commit_id):
     return f"https://github.com/ismailwedihaji/hookTest/commit/{commit_id}"
 
 # Step 4: Clone the repository and check out the branch
-# def clone_check(repo_url, branch):
-#     """Clone the repository and perform syntax checking."""
-#     import tempfile
-#     import shutil
-#     from git import Repo
-#     temp_dir = tempfile.mkdtemp()
-#     try:
-#         print(f"Cloning {repo_url} branch {branch} to {temp_dir}")  # Debugging output
-#         repo = Repo.clone_from(repo_url, temp_dir, branch=branch)
-#         commit_id = repo.head.commit.hexsha  # Get commit ID
-#         return commit_id, temp_dir
-#     except Exception as e:
-#         print(f"Error during clone: {e}")
-#         return None, None
-#     finally:
-#         shutil.rmtree(temp_dir)
+def clone_check_DB(repo_url, branch):
+    """Clone the repository and perform syntax checking."""
+    import tempfile
+    import shutil
+    from git import Repo
+    temp_dir = tempfile.mkdtemp()
+    try:
+        print(f"Cloning {repo_url} branch {branch} to {temp_dir}")  # Debugging output
+        repo = Repo.clone_from(repo_url, temp_dir, branch=branch)
+        commit_id = repo.head.commit.hexsha  # Get commit ID
+        return commit_id, temp_dir
+    except Exception as e:
+        print(f"Error during clone: {e}")
+        return None, None
+    finally:
+        shutil.rmtree(temp_dir)
