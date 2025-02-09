@@ -45,8 +45,6 @@ class SimpleHandler(BaseHTTPRequestHandler):
                 branch = payload['ref'].split('/')[-1]  # refs/heads/branch-name -> branch-name
             result = clone_check(repo_url, branch) 
             syntaxcheck = syntax_check(result)
-            print("result: ", result)
-            print("syntaxcheck: ", syntaxcheck)
             if syntaxcheck:
                 print("Syntax Check Passed")
             else:
